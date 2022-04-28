@@ -1,0 +1,48 @@
+{
+	"info": {
+		"_postman_id": "f59ab402-ef23-431c-ab74-dea12052ffa5",
+		"name": "collection1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://alightdevelopmentandit.atlassian.net/rest/api/2/issue/ADAMIGR-67",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "yFeY1H7szY17H1rGG3Vs3E93",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "abhaysingh.verma@alight.com",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://alightdevelopmentandit.atlassian.net/rest/api/2/issue/ADAMIGR-67",
+					"protocol": "https",
+					"host": [
+						"alightdevelopmentandit",
+						"atlassian",
+						"net"
+					],
+					"path": [
+						"rest",
+						"api",
+						"2",
+						"issue",
+						"ADAMIGR-67"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,451 @@
+{
+	"info": {
+		"_postman_id": "9bd4465d-8535-4412-8440-f0f804ad9ee0",
+		"name": "Automated_Channel_CustomHMWidgets_Service_Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "PreTest",
+			"item": [
+				{
+					"name": "Get Service Version",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get service version - pretest\", function() {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.have.property('ServiceName');",
+									"    pm.expect(jsonData[0]).to.have.property('ServiceTags');",
+									"    console.log('service-name = ' + jsonData[0].ServiceName);",
+									"    console.log('service-version-pretest = ' + jsonData[0].ServiceTags[0]);",
+									"    // Set service name/version for postgres",
+									"    pm.globals.set('serviceName', jsonData[0].ServiceName);",
+									"    pm.globals.set('serviceVersion', jsonData[0].ServiceTags[0]);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{consul}}/v1/catalog/service/{{serviceName}}",
+							"protocol": "http",
+							"host": [
+								"{{consul}}"
+							],
+							"path": [
+								"v1",
+								"catalog",
+								"service",
+								"{{serviceName}}"
+							]
+						},
+						"description": "Get service version at the beginning of the test so it can later be compared with the version at the end of the test to ensure it has not changed during the test - which would invalidate the test."
+					},
+					"response": []
+				},
+				{
+					"name": "Get OAuth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get oauth token\", function() {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.auth_status).to.equal('AUTHENTICATED')",
+									"    console.log('oauth token = ' + jsonData.access_token);",
+									"    pm.collectionVariables.set('oauthToken', jsonData.access_token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{oauthPassword}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{oauthUsername}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{apiServer}}/api/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{apiServer}}"
+							],
+							"path": [
+								"api",
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Retrieves an oAuth token."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Person Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"start person session\", function() {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.equal('success');",
+									"    pm.response.to.have.header('alightPersonSessionToken');",
+									"    console.log('alightPersonSessionToken = ' + pm.response.headers.get('alightPersonSessionToken'));",
+									"    pm.collectionVariables.set('alightPersonSessionToken', pm.response.headers.get('alightPersonSessionToken'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "bearer {{oauthToken}}",
+								"equals": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "brokerUserId",
+									"value": "{{brokerUserId}}",
+									"type": "text"
+								},
+								{
+									"key": "accessToken",
+									"value": "{{oauthToken}}",
+									"type": "text"
+								},
+								{
+									"key": "clientId",
+									"value": "{{clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "systemInstanceId",
+									"value": "{{systemInstanceId}}",
+									"type": "text"
+								},
+								{
+									"key": "subjectId",
+									"value": "{{subjectId}}",
+									"type": "text"
+								},
+								{
+									"key": "subjectType",
+									"value": "{{subjectType}}",
+									"type": "text"
+								},
+								{
+									"key": "testCfg",
+									"value": "{{trnsId}}",
+									"type": "text"
+								},
+								{
+									"key": "idMapping",
+									"value": "[{\"platformType\":\"TBA\",\"clientId\":\"{{clientId}}\",\"platformExternalId\":\"{{subjectId}}\",\"taxPayerId\":\"{{subjectId}}\",\"platformInternalId\":\"{{subjectInternalId}}\",\"testCfg\":\"{{trnsId}}\",\"domain\":\"DB,DC,HM,YTR\",\"normalizedClientId\":\"{{clientId}}\",\"roleType\":\"rkp\"}]",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{apiServer}}/api/session/startSessionForPerson",
+							"protocol": "https",
+							"host": [
+								"{{apiServer}}"
+							],
+							"path": [
+								"api",
+								"session",
+								"startSessionForPerson"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is ok\", function() {",
+									"    pm.response.to.have.status(200);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "alightPersonSessionToken",
+								"value": "{{alightPersonSessionToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiServer}}/api/{{servicePath}}/health",
+							"protocol": "https",
+							"host": [
+								"{{apiServer}}"
+							],
+							"path": [
+								"api",
+								"{{servicePath}}",
+								"health"
+							]
+						},
+						"description": "Health check"
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check - unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is unauthorized\", function() {",
+									"    pm.response.to.have.status(401);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.equal('Missing or invalid session token');",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{apiServer}}/api/{{servicePath}}/health",
+							"protocol": "https",
+							"host": [
+								"{{apiServer}}"
+							],
+							"path": [
+								"api",
+								"{{servicePath}}",
+								"health"
+							]
+						},
+						"description": "Health Check Unauthorized"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test - Home",
+			"item": [
+				{
+					"name": "Get /",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is ok\", function() {",
+									"    pm.response.to.have.status(500);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).not.equal(undefined)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "alightPersonSessionToken",
+								"value": "{{alightPersonSessionToken}}",
+								"type": "text"
+							},
+							{
+								"key": "alightRequestHeader",
+								"value": "{\"locale\":\"en_US\", \"clientId\":\"{{clientId}}\",\"channelRequestData\":\"\"}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiServer}}/api/{{servicePath}}/wellnessActionPlanWidget?exprName=IST_WAP_TEST",
+							"protocol": "https",
+							"host": [
+								"{{apiServer}}"
+							],
+							"path": [
+								"api",
+								"{{servicePath}}",
+								"wellnessActionPlanWidget"
+							],
+							"query": [
+								{
+									"key": "exprName",
+									"value": "IST_WAP_TEST"
+								}
+							]
+						},
+						"description": "Get root"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "PostTest",
+			"item": [
+				{
+					"name": "Validate service version has not changed during test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get service version - posttest\", function() {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0]).to.have.property('ServiceName');    ",
+									"    pm.expect(jsonData[0]).to.have.property('ServiceTags');",
+									"    console.log('service-name = ' + jsonData[0].ServiceName);",
+									"    console.log('service-version-posttest = ' + jsonData[0].ServiceTags[0]);",
+									"    pm.expect(jsonData[0].ServiceTags[0]).equals(pm.globals.get('serviceVersion'));",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{consul}}/v1/catalog/service/{{serviceName}}",
+							"protocol": "http",
+							"host": [
+								"{{consul}}"
+							],
+							"path": [
+								"v1",
+								"catalog",
+								"service",
+								"{{serviceName}}"
+							]
+						},
+						"description": "Get service version at the end of the test and ensure it has not changed during the test - which would invalidate the test."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "serviceName",
+			"value": "channel-customhmwidgets"
+		},
+		{
+			"key": "servicePath",
+			"value": "channel/customhmwidgets"
+		},
+		{
+			"key": "oauthToken",
+			"value": ""
+		},
+		{
+			"key": "alightPersonSessionToken",
+			"value": ""
+		}
+	]
+}
